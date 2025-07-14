@@ -7,7 +7,7 @@ app.include_router(players_router)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to NBA Fantasy API"}
+    return {"message": "hello"}
 
 @app.get("/health")
 async def health_check():

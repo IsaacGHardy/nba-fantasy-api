@@ -1,9 +1,10 @@
+from typing import Any
 from fastapi import APIRouter
-from app.services.nba_api_service import get_player_data
+from app.services.extraction_service import get_all_players
 from app.models.player import Player
 
 router = APIRouter()
 
-@router.get("/players", response_model=list[Player])
+@router.get("/players", response_model=list[Any])
 def get_players():
-    return get_player_data()
+    return get_all_players()

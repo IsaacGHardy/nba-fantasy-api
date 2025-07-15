@@ -1,4 +1,3 @@
-from typing import Any
 from app.models.player import Player
 from nba_api.stats.static import players
 from nba_api.stats.endpoints import playerfantasyprofilebargraph as fantasyprofile
@@ -9,30 +8,32 @@ def get_player(id) -> Player | None:
     Returns None if data is unavailable.
     """
     try:
-        raw_data = fantasyprofile.PlayerFantasyProfileBarGraph(player_id=id, season='2024-2025').get_json()['datSets']['SeasonAvg']
+        raw_data = fantasyprofile.PlayerFantasyProfileBarGraph(player_id=id, season='2024-25').get_data_frames()[1]
+        stats = raw_data.iloc[0]  # First row (player's stats)
         return Player(
-            id=raw_data['id'],
-            name=raw_data['PLAYER_NAME'],
-            team=raw_data['TEAM_ABBREVIATION'],
+            name=stats['PLAYER_NAME'],
+            team=stats['TEAM_ABBREVIATION'],
             position='PG',
-            pts=raw_data['PTS'],
-            rebs=raw_data['REB'],
-            ast=raw_data['AST'],
-            stl=raw_data['STL'],
-            blk=raw_data['BLK']
+            pts=stats['PTS'],
+            rebs=stats['REB'],
+            ast=stats['AST'],
+            stl=stats['STL'],
+            blk=stats['BLK']
         )
     except Exception:
         return None
 
-def get_all_players() -> list[Any]:
+def get_all_players() -> list[Player]:
     """
     Fetches all players from the NBA API and returns them as a list of Player objects.
     Skips players with missing fantasy data.
     """
-    raw_data = players.get_active_players()
-    """ player_list = []
+
+    
+    raw_data = players.get_active_players()[:30]
+    player_list = []
     for p in raw_data:
         player = get_player(p['id'])
         if player:
-            player_list.append(player) """
-    return raw_data
+            player_list.append(player)
+    return player_list

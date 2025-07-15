@@ -1,9 +1,9 @@
+from typing import Any
 from pydantic import BaseModel
 
 class Player(BaseModel):
-    id: int
     name: str
-    team: str
+    team: Any
     position: str
     pts: float
     rebs: float

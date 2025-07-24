@@ -1,6 +1,34 @@
 from app.models.player import FantasyPlayer, Player
 from app.models.scoring import Scoring
 
+from app.services.utility_service import CompeteStatus, get_trimmed_min_max
+from app.services.utility_service import get_rebuild_value
+
+def set_contend_value(player: FantasyPlayer, val: float):
+    player.contend_value = val
+
+def set_rebuild_value(player: FantasyPlayer, val: float):
+    player.rebuild_value = val
+
+def determine_value_to_set(player: FantasyPlayer, val: float, compete_status: CompeteStatus):
+    if compete_status == CompeteStatus.CONTEND:
+        set_contend_value(player, val)
+    elif compete_status == CompeteStatus.REBUILD:
+        set_rebuild_value(player, val)
+
+def set_value(player: FantasyPlayer, min_pts: float, max_pts: float, compete_status: CompeteStatus):
+    """
+    Sets a normalized value (50.00–100.00) for this player based on fantasy_pts.
+    """
+
+    min_val, max_val = 50.0, 100.0
+    if max_pts == min_pts:
+        determine_value_to_set(player, max_val, compete_status)
+    else:
+        self_value = player.fantasy_pts if compete_status == CompeteStatus.CONTEND else get_rebuild_value(player.fantasy_pts, player.age)
+        val = round(((self_value - min_pts) / (max_pts - min_pts)) * (max_val - min_val) + min_val, 2)
+        determine_value_to_set(player, val, compete_status)
+
 def calculate_fantasy_points(player: Player, scoring: Scoring) -> float:
     """
     Calculates fantasy points for a player based on their scoring stats.
@@ -26,19 +54,13 @@ def calculate_fantasy_points(player: Player, scoring: Scoring) -> float:
 
     return fantasy_pts
 
-def get_trimmed_min_max(players: list[FantasyPlayer], trim: int):
-    """ 
-    Returns the minimum and maximum fantasy points after trimming the top and bottom players.
-    This is useful for normalizing player values.
+def assign_player_ages(player_ages: dict[str, int], player_list: list[FantasyPlayer]):
     """
-    sorted_players = sorted(players, key=lambda p: p.fantasy_pts)
-    if len(players) > 2 * trim:
-        trimmed = sorted_players[trim:-trim]
-    else:
-        trimmed = sorted_players
-    min_pts = min(p.fantasy_pts for p in trimmed)
-    max_pts = max(p.fantasy_pts for p in trimmed)
-    return min_pts, max_pts
+    Assigns ages to players in the player_list based on player_ages dictionary.
+    """
+    for player in player_list:
+        if player.id in player_ages:
+            player.age = player_ages[player.id]
 
 def calculate_player_value(player_list: list[FantasyPlayer]): 
     """
@@ -46,11 +68,14 @@ def calculate_player_value(player_list: list[FantasyPlayer]):
     and the contention factor of the team.
     """
 
-    min_pts, max_pts = get_trimmed_min_max(player_list, trim=6)
+    min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.CONTEND)
     for player in player_list:
-        player.set_normalized_value(min_pts, max_pts)
-    
-    return player.pts
+        set_value(player, min_pts, max_pts, compete_status=CompeteStatus.CONTEND)
+
+    min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.REBUILD)
+    for player in player_list:
+        set_value(player, min_pts, max_pts, compete_status=CompeteStatus.REBUILD)
+
 
 def create_fantasy_player(player: Player, scoring: Scoring) -> FantasyPlayer:
     """

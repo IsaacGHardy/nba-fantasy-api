@@ -18,24 +18,22 @@ def get_rebuild_value(pts: float, age: int) -> float:
     Calculates the rebuild value for a player based on their age.
     Young players have their value increased at a greater rate than older players.
     """
-    if(age <= 18):
-        return pts * 3
-    elif(age <= 20):
+    if(age <= 19):
         return pts * 2
     elif(age <= 22):
-        return pts * 1.75
+        return pts * 1.9
     elif(age <= 24):
-        return pts * 1.5
+        return pts * 1.8
     elif(age <= 26):
-        return pts * 1.25
+        return pts * 1.6
     elif(age <= 28):
-        return pts * 1
+        return pts * 1.2
     elif(age <= 30):
-        return pts * 0.75
-    elif(age <= 34):
-        return pts * 0.5
+        return pts * 1.0
+    elif(age <= 32):
+        return pts * 0.8
     else:
-        return pts * 0.25
+        return pts * 0.6
     
 
 def get_trimmed_min_max(players: list[FantasyPlayer], trim: int, competeStatus: CompeteStatus):

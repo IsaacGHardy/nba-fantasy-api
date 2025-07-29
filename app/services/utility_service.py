@@ -1,16 +1,18 @@
-from datetime import datetime
+from datetime import date
 from app.models.competeStatus import CompeteStatus
-from app.models.player import FantasyPlayer
+from app.models.sql_models import PlayerValue
 
 
 
-def calculate_age_from_birthdate(birth_date: str) -> int:
+def calculate_age_from_birthdate(birth_date: date | None) -> int:
     """
     Calculates age from a birthdate string in the format 'MMM DD, YYYY'.
     """
-    birth = datetime.strptime(birth_date, "%b %d, %Y")
-    today = datetime.today()
-    age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+
+    if birth_date is None:
+        return 0
+    today = date.today()
+    age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
     return age
 
 def get_rebuild_value(pts: float, age: int) -> float:
@@ -36,7 +38,7 @@ def get_rebuild_value(pts: float, age: int) -> float:
         return pts * 0.6
     
 
-def get_trimmed_min_max(players: list[FantasyPlayer], trim: int, competeStatus: CompeteStatus):
+def get_trimmed_min_max(players: list[PlayerValue], trim: int, competeStatus: CompeteStatus):
     """ 
     Returns the minimum and maximum fantasy points after trimming the top and bottom players.
     This is useful for normalizing player values.

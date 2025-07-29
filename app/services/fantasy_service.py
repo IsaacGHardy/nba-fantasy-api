@@ -1,22 +1,18 @@
 from app.models.player import FantasyPlayer, Player
+from app.models.sql_models import PlayerValue
 from app.models.scoring import Scoring
 
 from app.services.utility_service import CompeteStatus, get_trimmed_min_max
 from app.services.utility_service import get_rebuild_value
 
-def set_contend_value(player: FantasyPlayer, val: float):
-    player.contend_value = val
 
-def set_rebuild_value(player: FantasyPlayer, val: float):
-    player.rebuild_value = val
-
-def determine_value_to_set(player: FantasyPlayer, val: float, compete_status: CompeteStatus):
+def determine_value_to_set(player: PlayerValue, val: float, compete_status: CompeteStatus):
     if compete_status == CompeteStatus.CONTEND:
-        set_contend_value(player, val)
+        player.contend_value = val
     elif compete_status == CompeteStatus.REBUILD:
-        set_rebuild_value(player, val)
+        player.rebuild_value = val
 
-def set_value(player: FantasyPlayer, min_pts: float, max_pts: float, compete_status: CompeteStatus):
+def set_value(player: PlayerValue, min_pts: float, max_pts: float, compete_status: CompeteStatus):
     """
     Sets a normalized value (50.00–100.00) for this player based on fantasy_pts.
     """
@@ -54,15 +50,7 @@ def calculate_fantasy_points(player: Player, scoring: Scoring) -> float:
 
     return fantasy_pts
 
-def assign_player_ages(player_ages: dict[str, int], player_list: list[FantasyPlayer]):
-    """
-    Assigns ages to players in the player_list based on player_ages dictionary.
-    """
-    for player in player_list:
-        if player.id in player_ages:
-            player.age = player_ages[player.id]
-
-def calculate_player_value(player_list: list[FantasyPlayer]): 
+def calculate_player_value(player_list: list[PlayerValue]): 
     """
     Calculates the value of a player based on their fantasy points 
     and the contention factor of the team.

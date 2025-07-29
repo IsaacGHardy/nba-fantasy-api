@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 
+from datetime import date
+
 class Player(BaseModel):
-    id: str
+    id: str | int
     name: str
     team: str
     position: str
@@ -16,6 +18,7 @@ class Player(BaseModel):
     fga: float
     ftm: float
     fta: float
+    birth_date: date | None = None
 
 class FantasyPlayer(Player):
     fantasy_pts: float = 0.0

@@ -1,18 +1,21 @@
-import enum
+from typing import Union
 from fastapi import APIRouter, Query
-from app.models.sql_models import PlayerValue
-from app.models.player import FantasyPlayer, Player
-from app.services.data_service import calculate_player_values
-from app.static.scoring import sleeper, espn
-from app.services.db_service import get_all_players, upsert_player_values
+from app.models.fantasy_player import FantasyPlayer
+from app.models.draft_pick import FantasyPick  
+from app.services.db_service import get_all_players, get_all_draft_picks
 
 router = APIRouter()
 
-@router.get("/players", response_model=list[FantasyPlayer])
+@router.get("/players", response_model=list[Union[FantasyPlayer, FantasyPick]])
 def get_players(scoring: str = Query("sleeper", enum=["sleeper", "espn"])):
-    table_name: str
+    # Get players and picks
     if scoring == "sleeper":
         table_name = "sleeper_data"
+        pick_table = "sleeper_picks"
     else:
         table_name = "espn_data"
-    return get_all_players(table_name)
+        pick_table = "espn_picks"
+
+    players = [FantasyPlayer(**p) for p in get_all_players(table_name)]
+    picks = [FantasyPick(**p) for p in get_all_draft_picks(pick_table)]
+    return players + picks

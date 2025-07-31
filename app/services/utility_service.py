@@ -51,3 +51,12 @@ def get_trimmed_min_max(players: list[PlayerValue], trim: int, competeStatus: Co
     min_pts = min(p.fantasy_pts if competeStatus == CompeteStatus.CONTEND else get_rebuild_value(p.fantasy_pts, p.age) for p in trimmed)
     max_pts = max(p.fantasy_pts if competeStatus == CompeteStatus.CONTEND else get_rebuild_value(p.fantasy_pts, p.age) for p in trimmed)
     return min_pts, max_pts
+
+def generate_round_with_suffix(round: int) -> str:
+    """
+    Generates a round string with the appropriate suffix.
+    """
+    if round == 1: return "1st"
+    if round == 2: return "2nd"
+    if round == 3: return "3rd"
+    else: return f"{round}th"

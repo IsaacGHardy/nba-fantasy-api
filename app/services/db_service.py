@@ -32,3 +32,13 @@ def upsert_player_values(player_value_data: list[dict], table_name: str):
     # Upsert player values into the specified table
     response = supabase.table(table_name).upsert(player_value_data).execute()
     return response.data
+
+def upsert_draft_picks(draft_pick_data: list[dict], table_name: str):
+    # Upsert draft picks into the specified table
+    response = supabase.table(table_name).upsert(draft_pick_data).execute()
+    return response.data
+
+def get_all_draft_picks(table_name: str) -> list[dict]:
+    # Fetch all draft picks from the specified table
+    response = supabase.table(table_name).select("*").execute()
+    return response.data

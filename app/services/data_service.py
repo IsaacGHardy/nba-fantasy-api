@@ -1,10 +1,10 @@
-from app.models.player import Player
+from app.models.sql_models import Player
 from app.models.scoring import Scoring
 
 from nba_api.stats.endpoints import fantasywidget
 
 from app.models.sql_models import PlayerValue
-from app.services.fantasy_service import calculate_fantasy_points, create_fantasy_player
+from app.services.fantasy_service import calculate_fantasy_points
 from app.services.fantasy_service import calculate_player_value
 from app.services.utility_service import calculate_age_from_birthdate
 
@@ -13,7 +13,7 @@ def convert_player_data_to_model(player_data: dict) -> Player:
     Converts raw player data dictionary to Player model.
     """
     return Player(
-        id=str(player_data[0]),
+        id=player_data[0],
         name=player_data[1],
         team=player_data[4],
         position=player_data[2],

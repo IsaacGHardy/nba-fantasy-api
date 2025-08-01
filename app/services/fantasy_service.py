@@ -2,15 +2,35 @@ from app.models.fantasy_player import FantasyPlayer
 from app.models.sql_models import PlayerValue, Player, DraftPick
 from app.models.scoring import Scoring
 
-from app.services.utility_service import CompeteStatus, generate_round_with_suffix, get_trimmed_min_max
+from app.services.utility_service import CompeteStatus, generate_round_with_suffix, get_compete_value, get_neutral_value, get_reload_value, get_trimmed_min_max
 from app.services.utility_service import get_rebuild_value
 
 
 def determine_value_to_set(player: PlayerValue, val: float, compete_status: CompeteStatus):
     if compete_status == CompeteStatus.CONTEND:
         player.contend_value = val
+    elif compete_status == CompeteStatus.COMPETE:
+        player.compete_value = val
+    elif compete_status == CompeteStatus.NEUTRAL:
+        player.neutral_value = val
+    elif compete_status == CompeteStatus.RELOAD:
+        player.reload_value = val
     elif compete_status == CompeteStatus.REBUILD:
         player.rebuild_value = val
+
+def get_value_by_compete_status(pts: float, age: int, compete_status: CompeteStatus) -> float:
+    if compete_status == CompeteStatus.CONTEND:
+        return pts
+    elif compete_status == CompeteStatus.COMPETE:
+        return get_compete_value(pts, age)
+    elif compete_status == CompeteStatus.NEUTRAL:
+        return get_neutral_value(pts, age)
+    elif compete_status == CompeteStatus.RELOAD:
+        return get_reload_value(pts, age)
+    elif compete_status == CompeteStatus.REBUILD:
+        return get_rebuild_value(pts, age)
+    else:
+        return 0.0
 
 def set_value(player: PlayerValue, min_pts: float, max_pts: float, compete_status: CompeteStatus):
     """
@@ -21,7 +41,7 @@ def set_value(player: PlayerValue, min_pts: float, max_pts: float, compete_statu
     if max_pts == min_pts:
         determine_value_to_set(player, max_val, compete_status)
     else:
-        self_value = player.fantasy_pts if compete_status == CompeteStatus.CONTEND else get_rebuild_value(player.fantasy_pts, player.age)
+        self_value = get_value_by_compete_status(player.fantasy_pts, player.age, compete_status)
         val = round(((self_value - min_pts) / (max_pts - min_pts)) * (max_val - min_val) + min_val, 2)
         determine_value_to_set(player, val, compete_status)
 
@@ -50,7 +70,7 @@ def calculate_fantasy_points(player: Player, scoring: Scoring) -> float:
 
     return fantasy_pts
 
-def calculate_player_value(player_list: list[PlayerValue]): 
+def calculate_player_values(player_list: list[PlayerValue]): 
     """
     Calculates the value of a player based on their fantasy points 
     and the contention factor of the team.
@@ -59,6 +79,18 @@ def calculate_player_value(player_list: list[PlayerValue]):
     min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.CONTEND)
     for player in player_list:
         set_value(player, min_pts, max_pts, compete_status=CompeteStatus.CONTEND)
+
+    min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.COMPETE)
+    for player in player_list:
+        set_value(player, min_pts, max_pts, compete_status=CompeteStatus.COMPETE)   
+
+    min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.NEUTRAL)
+    for player in player_list:
+        set_value(player, min_pts, max_pts, compete_status=CompeteStatus.NEUTRAL)
+
+    min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.RELOAD)
+    for player in player_list:
+        set_value(player, min_pts, max_pts, compete_status=CompeteStatus.RELOAD)
 
     min_pts, max_pts = get_trimmed_min_max(player_list, trim=6, competeStatus=CompeteStatus.REBUILD)
     for player in player_list:

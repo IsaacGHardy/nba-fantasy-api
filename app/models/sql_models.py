@@ -6,6 +6,9 @@ class PlayerValue(BaseModel):
     id: int
     fantasy_pts: float = 0.0
     contend_value: float = 0.0
+    compete_value: float = 0.0
+    neutral_value: float = 0.0
+    reload_value: float = 0.0
     rebuild_value: float = 0.0
     age: int = 0
 

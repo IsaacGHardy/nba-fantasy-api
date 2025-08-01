@@ -5,7 +5,7 @@ from nba_api.stats.endpoints import fantasywidget
 
 from app.models.sql_models import PlayerValue
 from app.services.fantasy_service import calculate_fantasy_points
-from app.services.fantasy_service import calculate_player_value
+from app.services.fantasy_service import calculate_player_values
 from app.services.utility_service import calculate_age_from_birthdate
 
 def convert_player_data_to_model(player_data: dict) -> Player:  
@@ -49,7 +49,7 @@ def get_all_players_raw() -> list[Player]:
 
     return player_list
 
-def calculate_player_values(player_list: list[Player], scoring: Scoring) ->list[PlayerValue]: 
+def convert_player_to_player_values(player_list: list[Player], scoring: Scoring) ->list[PlayerValue]: 
     player_value_list = []
     for player in player_list: 
         player_value = PlayerValue(
@@ -60,6 +60,6 @@ def calculate_player_values(player_list: list[Player], scoring: Scoring) ->list[
         player_value_list.append(player_value)
 
 
-    calculate_player_value(player_value_list)
+    calculate_player_values(player_value_list)
 
     return player_value_list

@@ -1,4 +1,4 @@
-def get_rebuild_value(pts: float, age: int) -> float:
+def get_player_rebuild_value(pts: float, age: int) -> float:
     """
     Calculates the rebuild value for a player based on their age.
     Young players have their value greatly increased, 
@@ -23,7 +23,7 @@ def get_rebuild_value(pts: float, age: int) -> float:
     else:
         return pts * 0.25
 
-def get_reload_value(pts: float, age: int) -> float:
+def get_player_reload_value(pts: float, age: int) -> float:
     """
     Calculates the reload value for a player based on their age.
         Young players have their value increased, 
@@ -55,7 +55,7 @@ def get_reload_value(pts: float, age: int) -> float:
     else:
         return pts * 0.25
     
-def get_neutral_value(pts: float, age: int) -> float:
+def get_player_neutral_value(pts: float, age: int) -> float:
     """
     Calculates the neutral value for a player based on their age.
         Young players have their value slightly increased,
@@ -89,7 +89,7 @@ def get_neutral_value(pts: float, age: int) -> float:
     else:
         return pts * 0.5
     
-def get_compete_value(pts: float, age: int) -> float:
+def get_player_compete_value(pts: float, age: int) -> float:
     """
     Calculates the compete value for a player based on their age.
         Young players have their value barely increased,

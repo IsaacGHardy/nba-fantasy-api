@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
 
-
 class PlayerValue(BaseModel):
     id: int
     fantasy_pts: float = 0.0
@@ -35,6 +34,10 @@ class DraftPick(BaseModel):
     id: int
     year: int
     round: int
-    tier: str  # 'early', 'mid', 'late'
+    tier: str
     label: str
-    value: float
+    contend_value: float
+    compete_value: float
+    neutral_value: float
+    reload_value: float
+    rebuild_value: float

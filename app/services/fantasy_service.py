@@ -1,9 +1,14 @@
+from app.models.fantasy_pick import Tier
 from app.models.fantasy_player import FantasyPlayer
 from app.models.sql_models import PlayerValue, Player, DraftPick
 from app.models.scoring import Scoring
+from app.models.competeStatus import CompeteStatus
 
-from app.services.utility_service import CompeteStatus, generate_round_with_suffix, get_compete_value, get_neutral_value, get_reload_value, get_trimmed_min_max
-from app.services.utility_service import get_rebuild_value
+from app.static.pick_info import YEARS, ROUNDS, TIERS
+
+from app.services.pick_value_service import get_pick_value_by_year, get_pick_values
+from app.services.utility_service import generate_round_with_suffix, get_player_compete_value, get_player_neutral_value, get_player_reload_value, get_trimmed_min_max
+from app.services.utility_service import get_player_rebuild_value
 
 
 def determine_value_to_set(player: PlayerValue, val: float, compete_status: CompeteStatus):
@@ -22,13 +27,13 @@ def get_value_by_compete_status(pts: float, age: int, compete_status: CompeteSta
     if compete_status == CompeteStatus.CONTEND:
         return pts
     elif compete_status == CompeteStatus.COMPETE:
-        return get_compete_value(pts, age)
+        return get_player_compete_value(pts, age)
     elif compete_status == CompeteStatus.NEUTRAL:
-        return get_neutral_value(pts, age)
+        return get_player_neutral_value(pts, age)
     elif compete_status == CompeteStatus.RELOAD:
-        return get_reload_value(pts, age)
+        return get_player_reload_value(pts, age)
     elif compete_status == CompeteStatus.REBUILD:
-        return get_rebuild_value(pts, age)
+        return get_player_rebuild_value(pts, age)
     else:
         return 0.0
 
@@ -96,34 +101,32 @@ def calculate_player_values(player_list: list[PlayerValue]):
     for player in player_list:
         set_value(player, min_pts, max_pts, compete_status=CompeteStatus.REBUILD)
 
-def generate_draft_picks(players: list[FantasyPlayer], years=(2025, 2026, 2027, 2028), rounds=(1, 2, 3), tiers=("early", "mid", "late")) -> list[DraftPick]:
+def generate_draft_picks(players: list[FantasyPlayer], years=YEARS, rounds=ROUNDS, tiers=TIERS) -> list[DraftPick]:
     """
     Given a list of FantasyPlayer, segment the top 1/3 into 12 sections and assign each pick the value at the bottom of its section.
     Returns a list of DraftPick objects.
     """
-    # Sort players by value (rebuild_value)
-    sorted_players = sorted(players, key=lambda p: p.rebuild_value, reverse=True)
-    top_third = sorted_players[:len(sorted_players)//3]
-    num_unique_picks = len(rounds) * len(tiers)
-    section_size = max(1, len(top_third) // num_unique_picks)
-    # Compute value for each unique (round, tier) combo
-    pick_value_map = {}
-    pick_idx = 0
-    for rnd in rounds:
-        for tier in tiers:
-            idx = min((pick_idx + 1) * section_size - 1, len(top_third) - 1)
-            value = top_third[idx].rebuild_value if idx >= 0 else 0.0
-            pick_value_map[(rnd, tier)] = value
-            pick_idx += 1
-    # Now assign value to all years for each (round, tier)
+    pick_contend_value_map = get_pick_values(players, CompeteStatus.CONTEND, rounds, tiers)
+    pick_compete_value_map = get_pick_values(players, CompeteStatus.COMPETE, rounds, tiers)
+    pick_neutral_value_map = get_pick_values(players, CompeteStatus.NEUTRAL, rounds, tiers)
+    pick_reload_value_map = get_pick_values(players, CompeteStatus.RELOAD, rounds, tiers)
+    pick_rebuild_value_map = get_pick_values(players, CompeteStatus.REBUILD, rounds, tiers)
+
     picks = []
-    tier_digit = {"early": "1", "mid": "2", "late": "3"}
+    tier_digit = {Tier.EARLY: "1", Tier.MID: "2", Tier.LATE: "3"}
     for year in years:
         for rnd in rounds:
             for tier in tiers:
-                label = f"{year} {tier.title()} {generate_round_with_suffix(rnd)}"
-                value = pick_value_map[(rnd, tier)]
+                label = f"{year} {tier.value} {generate_round_with_suffix(rnd)}"
+                contend_value = get_pick_value_by_year(pick_contend_value_map[(rnd, tier)], years[0], year)
+                compete_value = get_pick_value_by_year(pick_compete_value_map[(rnd, tier)], years[0], year)
+                neutral_value = get_pick_value_by_year(pick_neutral_value_map[(rnd, tier)], years[0], year)
+                reload_value = get_pick_value_by_year(pick_reload_value_map[(rnd, tier)], years[0], year)
+                rebuild_value = get_pick_value_by_year(pick_rebuild_value_map[(rnd, tier)], years[0], year)
                 id_str = f"{year}{rnd}{tier_digit[tier]}"
                 id = int(id_str)
-                picks.append(DraftPick(id=id, year=year, round=rnd, tier=tier, label=label, value=value))
+                picks.append(DraftPick(id=id, year=year, round=rnd, tier=tier.value, label=label, 
+                                       contend_value=contend_value, compete_value=compete_value, 
+                                       neutral_value=neutral_value, reload_value=reload_value, 
+                                       rebuild_value=rebuild_value))
     return picks

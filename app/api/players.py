@@ -1,7 +1,7 @@
 from typing import Union
 from fastapi import APIRouter, Query
 from app.models.fantasy_player import FantasyPlayer
-from app.models.draft_pick import FantasyPick  
+from app.models.fantasy_pick import FantasyPick  
 from app.services.db_service import get_all_players, get_all_draft_picks
 
 router = APIRouter()

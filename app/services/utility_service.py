@@ -1,11 +1,12 @@
 from datetime import date
 from app.models.competeStatus import CompeteStatus
+from app.models.fantasy_player import FantasyPlayer
 from app.models.sql_models import PlayerValue
-from app.services.value_service import (
-    get_compete_value,
-    get_neutral_value,
-    get_reload_value,
-    get_rebuild_value
+from app.services.player_value_service import (
+    get_player_compete_value,
+    get_player_neutral_value,
+    get_player_reload_value,
+    get_player_rebuild_value
 )
 
 
@@ -29,13 +30,13 @@ def get_trimmed_min_max(players: list[PlayerValue], trim: int, competeStatus: Co
     """
     # Define the value function based on compete status
     if competeStatus == CompeteStatus.REBUILD:
-        value_func = lambda p: get_rebuild_value(p.fantasy_pts, p.age)
+        value_func = lambda p: get_player_rebuild_value(p.fantasy_pts, p.age)
     elif competeStatus == CompeteStatus.RELOAD:
-        value_func = lambda p: get_reload_value(p.fantasy_pts, p.age)
+        value_func = lambda p: get_player_reload_value(p.fantasy_pts, p.age)
     elif competeStatus == CompeteStatus.NEUTRAL:
-        value_func = lambda p: get_neutral_value(p.fantasy_pts, p.age)
+        value_func = lambda p: get_player_neutral_value(p.fantasy_pts, p.age)
     elif competeStatus == CompeteStatus.COMPETE:
-        value_func = lambda p: get_compete_value(p.fantasy_pts, p.age)
+        value_func = lambda p: get_player_compete_value(p.fantasy_pts, p.age)
     else:  # CompeteStatus.CONTEND
         value_func = lambda p: p.fantasy_pts
     
@@ -62,3 +63,18 @@ def generate_round_with_suffix(round: int) -> str:
     if round == 2: return "2nd"
     if round == 3: return "3rd"
     else: return f"{round}th"
+
+def get_player_value_by_compete_status(player: FantasyPlayer, compete_status: CompeteStatus) -> float:
+    """
+    Returns the player value based on the compete status. Assumes player has all value attributes.
+    """
+    if compete_status == CompeteStatus.REBUILD:
+        return player.rebuild_value
+    elif compete_status == CompeteStatus.RELOAD:
+        return player.reload_value
+    elif compete_status == CompeteStatus.NEUTRAL:
+        return player.neutral_value
+    elif compete_status == CompeteStatus.COMPETE:
+        return player.compete_value
+    else:  # CompeteStatus.CONTEND
+        return player.contend_value

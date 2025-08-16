@@ -7,7 +7,7 @@ scheduler = AsyncIOScheduler()
 
 def start_scheduler():
     """Start the background job scheduler"""
-    # Run every day at 2 AM UTC
+    # Run every day at 8 AM UTC
     scheduler.add_job(
         update_data,
         CronTrigger(hour=8, minute=0),
@@ -15,7 +15,7 @@ def start_scheduler():
         name='Update draft picks nightly'
     )
     scheduler.start()
-    logging.info("Scheduler started - nightly updates will run at 2 AM UTC")
+    logging.info("Scheduler started - nightly updates will run at 8 AM UTC")
 
 def stop_scheduler():
     """Stop the background job scheduler"""

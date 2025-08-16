@@ -43,3 +43,7 @@ app.add_middleware(
 
 app.include_router(players_router)
 
+@app.get("/")
+def read_root():
+    return {"message": "NBA Fantasy API", "version": "1.0.0", "status": "running"}
+

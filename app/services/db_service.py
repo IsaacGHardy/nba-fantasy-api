@@ -13,17 +13,17 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL and SUPABASE_KEY must be set in the environment or .env file.")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def upsert_players(player_data_list: list[dict], table_name: str):
+def upsert_players(player_data_list: list[dict], table_name: str = "player_data"):
     # Upsert (insert or update) multiple player records into the specified table
     response = supabase.table(table_name).upsert(player_data_list).execute()
     return response.data
 
-def upsert_player(player_data: dict):
+def upsert_player(player_data: dict, table_name: str = "player_data"):
     # Upsert a single player record into the specified table
-    response = supabase.table("player_data").upsert(player_data).execute()
+    response = supabase.table(table_name).upsert(player_data).execute()
     return response.data
 
-def get_all_players(table_name: str = "player_data") -> list[dict]:
+def get_all_players(table_name: str = "player_data_view") -> list[dict]:
     # Fetch all players from the specified table
     response = supabase.table(table_name).select("*").execute()
     return response.data

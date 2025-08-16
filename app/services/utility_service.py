@@ -1,4 +1,5 @@
 from datetime import date
+from nba_api.stats.endpoints.commonplayerinfo import CommonPlayerInfo
 from app.models.competeStatus import CompeteStatus
 from app.models.fantasy_player import FantasyPlayer
 from app.models.sql_models import PlayerValue
@@ -8,7 +9,6 @@ from app.services.player_value_service import (
     get_player_reload_value,
     get_player_rebuild_value
 )
-
 
 def calculate_age_from_birthdate(birth_date: date | None) -> int:
     """
@@ -78,3 +78,12 @@ def get_player_value_by_compete_status(player: FantasyPlayer, compete_status: Co
         return player.compete_value
     else:  # CompeteStatus.CONTEND
         return player.contend_value
+    
+def get_player_birthdate(id: int) -> date | None:
+    data_raw = CommonPlayerInfo(player_id=id).get_dict ()
+
+    birthdate = data_raw['resultSets'][0]['rowSet'][0][7]
+
+    if birthdate:
+        return birthdate
+    return None

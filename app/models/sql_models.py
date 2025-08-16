@@ -28,7 +28,10 @@ class Player(BaseModel):
     fga: float
     ftm: float
     fta: float
+
+class PlayerBirthdate(Player):
     birth_date: date | None = None
+
 
 class DraftPick(BaseModel):
     id: int

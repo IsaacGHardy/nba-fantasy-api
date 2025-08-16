@@ -1,16 +1,21 @@
-from app.models.fantasy_player import FantasyPlayer
-from app.services.db_service import get_all_players, upsert_draft_picks
-from app.services.fantasy_service import generate_draft_picks
+import asyncio
+import logging
+from app.jobs.nightly_update import update_data
 
-
-def main():
-    player_list_raw = get_all_players("sleeper_data")
-
-    player_list = [FantasyPlayer(**p) for p in player_list_raw]
-
-    picks = generate_draft_picks(player_list)
-
-    upsert_draft_picks([pick.model_dump() for pick in picks], "sleeper_picks")
+# Set up logging to see what happens
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+    
+async def main():
+    logging.info("Starting nightly update test...")
+    try:
+        await update_data()
+        logging.info("✅ Nightly update completed successfully!")
+    except Exception as e:
+        logging.error(f"Nightly update failed: {e}")
+        raise
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

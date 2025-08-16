@@ -1,4 +1,4 @@
-from app.models.sql_models import Player
+from app.models.sql_models import Player, PlayerBirthdate
 from app.models.scoring import Scoring
 
 from nba_api.stats.endpoints import fantasywidget
@@ -49,7 +49,7 @@ def get_all_players_raw() -> list[Player]:
 
     return player_list
 
-def convert_player_to_player_values(player_list: list[Player], scoring: Scoring) ->list[PlayerValue]: 
+def convert_player_to_player_values(player_list: list[PlayerBirthdate], scoring: Scoring) ->list[PlayerValue]: 
     player_value_list = []
     for player in player_list: 
         player_value = PlayerValue(

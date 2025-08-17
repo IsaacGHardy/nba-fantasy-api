@@ -1,7 +1,5 @@
-
 from dotenv import load_dotenv
 
-from app.models.sql_models import PlayerValue
 load_dotenv()
 
 from supabase import create_client, Client
